@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- htmlmin:ignore -->
+<!--
+
+ Hi! The sourcecode is available on GitHub. https://github.com/nzblnk/nzb-monkey/tree/gh-pages
+
+-->
+<!-- htmlmin:ignore -->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>NZB-Monkey</title>
+    <meta name="viewport" content="width=device-width">
+    <style>@@include('../.inter/main.css')</style>
+</head>
+<body>
+@@include('../.inter/symbol/sprite.svg')
+<div class="wrapper">
+    <header>
+        <h1>NZB Monkey</h1>
+        <p><a href="https://nzblnk.github.io" target="_blank"><strong>NZBLNK™</strong></a> download helper</p>
+        <svg class="main-icon">
+            <use xlink:href="#logo-monkey" x="0" y="0"/>
+        </svg>
+
+        <p class="view">
+            <a href="http://github.com/nzblnk/nzb-monkey">
+                View the Project on GitHub
+                <small>nzblnk/nzb-monkey</small>
+            </a>
+        </p>
+
+        <h3>Downloads</h3>
+        <div id="download-buttons" class="is-loading"></div>
+        <menu id="menu">
+            <a href="#top" class="menu-h2">Home</a>
+        </menu>
+
+    </header>
+    <section>
+        {{intro}}
+    </section>
+
+    <section id="documentation">
+        {{installation}}
+        {{configuration}}
+    </section>
+
+    <footer>
+        <p>This project is maintained by <a href="http://github.com/nzblnk">NZBLNK</a></p>
+        <p>
+            <small>Hosted on GitHub Pages.<br> Based on a theme by <a
+                    href="https://github.com/orderedlist">orderedlist</a>.
+            </small>
+        </p>
+    </footer>
+</div>
+<script src="//cdn.polyfill.io/v2/polyfill.min.js?features=blissfuljs"></script>
+<script type="text/javascript">@@include('../.inter/app.js')</script>
+</body>
+</html>

@@ -1,4 +1,8 @@
 $sidewidth: 270px;
+$break-height: 1000px;
+$break-small: 480px;
+$break-medium: 720px;
+$break-large: 960px;
 
 @import 'https://fonts.googleapis.com/css?family=Exo:900|PT+Sans:400,700';
 
@@ -183,6 +187,11 @@ header {
 		width: 256px;
 		height: 256px;
 		padding-bottom: 20px;
+		@media screen and (max-height: $break-height) and (min-width: $break-large) {
+			width: 128px;
+			height: 128px;
+			padding-bottom: 10px;
+		}
 	}
 	h3 {
 		margin-top: 2em;
@@ -345,7 +354,7 @@ menu {
 	}
 }
 
-@media print, screen and (max-width: 960px) {
+@media print, screen and (max-width: $break-large) {
 
 	div.wrapper {
 		width:auto;
@@ -380,7 +389,7 @@ menu {
 	}
 }
 
-@media print, screen and (max-width: 720px) {
+@media print, screen and (max-width: $break-medium) {
 	body {
 		word-wrap:break-word;
 	}
@@ -398,7 +407,7 @@ menu {
 	}
 }
 
-@media print, screen and (max-width: 480px) {
+@media print, screen and (max-width: $break-small) {
 	body {
 		padding:15px;
 	}

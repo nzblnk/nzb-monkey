@@ -1,0 +1,6 @@
+pyperclip
+requests
+configobj
+colorama
+cryptography
+py2exe

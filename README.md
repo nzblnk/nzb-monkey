@@ -1,3 +1,5 @@
+![Monkey-Logo](resource/nzb-monkey.svg)
+
 # NZB Monkey
 
 Reference implementation of how to handle a [NZBLNK](https://nzblnk.github.io/)-URI.

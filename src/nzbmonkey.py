@@ -1055,7 +1055,7 @@ def sec_to_time(seconds, days_only=False, ):
 # region NZB Targets
 
 
-def push_nzb_sabnzbd(host, port, ssl, api_key, category, paused, sabnzbd_name, nzb_content,
+def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, category, paused, sabnzbd_name, nzb_content,
                      start_message='Pushing to SABNZBD', debug=False):
     """Push a NZB to SABnzbd
 
@@ -1063,6 +1063,7 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, category, paused, sabnzbd_name, n
     :param str port: SABnzbd Port
     :param bool ssl: Use https
     :param str api_key: NZB Api Key
+    :param str basepath: Basepath where SABnzbd lives
     :param str category: SABnzbd Category
     :param str paused: Add the nzb paused
     :param str sabnzbd_name: Name of the SABnzbd job. To send also the RAR password add {{password}} to the job name
@@ -1076,7 +1077,7 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, category, paused, sabnzbd_name, n
     print(start_message, end='', flush=True)
 
     scheme = 'https' if ssl else 'http'
-    req_url = '{0}://{1}:{2}/sabnzbd/api'.format(scheme, host, port)
+    req_url = '{0}://{1}:{2}/{3}/api'.format(scheme, host, port, basepath)
 
     post_data = {
         'output': 'xml',
@@ -1108,7 +1109,7 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, category, paused, sabnzbd_name, n
         return 1
 
 
-def push_nzb_nzbget(host, port, ssl, user, password, category, paused, nzb_filename, nzb_content,
+def push_nzb_nzbget(host, port, ssl, user, password, basepath, category, paused, nzb_filename, nzb_content,
                     start_message='Pushing to NZBGet', debug=False):
     """Push a NZB to NZBGet
 
@@ -1117,6 +1118,7 @@ def push_nzb_nzbget(host, port, ssl, user, password, category, paused, nzb_filen
     :param bool ssl: Use https
     :param str user: NZBGet User
     :param str password: NZBGet password
+    :param str basepath: NZBGet basepath
     :param str category: NZBGet category
     :param str paused: Add the nzb paused
     :param str nzb_filename: NZB filename for NZBGet
@@ -1131,7 +1133,7 @@ def push_nzb_nzbget(host, port, ssl, user, password, category, paused, nzb_filen
 
     scheme = 'https' if ssl else 'http'
 
-    req_url = '{0}://{1}:{2}/xmlrpc'.format(scheme, host, port)
+    req_url = '{0}://{1}:{2}/{3}'.format(scheme, host, port, basepath)
 
     # XMLRPC-request, see https://github.com/nzbget/nzbget/wiki/API-Method-%22append%22
 
@@ -1444,6 +1446,7 @@ def main():
                               exe_target_cfg.as_bool('ssl'),
                               exe_target_cfg.get('user', ''),
                               exe_target_cfg.get('pass', ''),
+                              exe_target_cfg.get('basepath', 'xmlrpc'),
                               category_args if category_args else exe_target_cfg.get('category', ''),
                               exe_target_cfg.as_bool('addpaused'),
                               nzbsrc['tag'],
@@ -1468,6 +1471,7 @@ def main():
                                exe_target_cfg.get('port', '8080'),
                                exe_target_cfg.as_bool('ssl'),
                                exe_target_cfg.get('nzbkey', ''),
+                               exe_target_cfg.get('basepath', 'sabnzbd'),
                                category_args if category_args else exe_target_cfg.get('category', ''),
                                exe_target_cfg.as_bool('addpaused'),
                                nzbsrc['tag'] if nzbsrc['pass'] is None else '%s{{%s}}' % (

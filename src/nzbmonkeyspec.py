@@ -36,6 +36,8 @@ port = string(default = '8080')
 ssl = boolean(default = False)
 # NZB Key
 nzbkey = string(default = '')
+# Basepath
+basepath = string(default = 'sabnzbd')
 # Category
 category = string(default = '')
 # Add the nzb paused to the queue
@@ -52,6 +54,8 @@ ssl = boolean(default = False)
 user = string(default = '')
 # NZBGet Password
 pass = string(default = '')
+# Basepath
+basepath = string(default = 'xmlrpc')
 # NZBGet Category
 category = string(default = '')
 # Add the nzb paused to the queue

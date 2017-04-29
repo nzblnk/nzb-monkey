@@ -2,6 +2,11 @@
 """
 
 History
+v0.1.11
++ Basepath added (thx ralle12345)
++ Sanitized searchstring (thx plintogo)
++ Basic auth for SABNzbD (thx MarcLandis)
+
 v0.1.10
 + requests 2.13.0 (incl openssl)
 + Bugfixes
@@ -46,5 +51,5 @@ v0.1.0
 
 """
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

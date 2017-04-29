@@ -36,6 +36,10 @@ port = string(default = '8080')
 ssl = boolean(default = False)
 # NZB Key
 nzbkey = string(default = '')
+# Basic Auth Username
+basicauth_username = string(default = '')
+# Basic Auth Password
+basicauth_password = string(default = '')
 # Basepath
 basepath = string(default = 'sabnzbd')
 # Category

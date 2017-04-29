@@ -1056,7 +1056,7 @@ def sec_to_time(seconds, days_only=False, ):
 # region NZB Targets
 
 
-def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, category, paused, sabnzbd_name, nzb_content,
+def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, basicauth_username, basicauth_password, category, paused, sabnzbd_name, nzb_content,
                      start_message='Pushing to SABNZBD', debug=False):
     """Push a NZB to SABnzbd
 
@@ -1065,6 +1065,8 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, category, paused, sabnz
     :param bool ssl: Use https
     :param str api_key: NZB Api Key
     :param str basepath: Basepath where SABnzbd lives
+    :param str basicauth_username: Username for Basic Auth
+    :param str basicauth_password: Password for Basic Auth
     :param str category: SABnzbd Category
     :param str paused: Add the nzb paused
     :param str sabnzbd_name: Name of the SABnzbd job. To send also the RAR password add {{password}} to the job name
@@ -1093,7 +1095,11 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, category, paused, sabnz
     nzb_data = {'nzbfile': (nzbname, io.BytesIO(nzb_content.encode('utf8')))}
 
     try:
-        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT)
+        auth = None
+        if basicauth_username and basicauth_password:
+            auth = (basicauth_username, basicauth_password)
+
+        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT, auth=auth)
     except requests.exceptions.RequestException as e:
         print(Col.FAIL + 'FAILED: {}'.format(e) + Col.OFF)
         return 1

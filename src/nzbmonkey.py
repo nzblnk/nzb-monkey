@@ -670,6 +670,7 @@ class NZBDownload(object):
         """Search for NZB Download URL and return the URL
         :return bool, str: """
         try:
+            self.header = self.header.replace('_', ' ')
             res = requests.get(self.search_url.format(quote(self.header, encoding='utf-8')),
                                timeout=REQUESTS_TIMEOUT, headers={'Cookie': 'agreed=true'}, verify=False)
         except requests.exceptions.Timeout:

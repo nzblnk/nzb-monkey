@@ -18,7 +18,7 @@
         headers: {'If-None-Match': localStorage.getItem('git_tag')}
     }).then(function(xhr){
         var dl = {}
-        if (xhr.status == 200) {
+        if (xhr.status === 200) {
             xhr.response.assets.forEach(function(el){
                 var name = el.name.match(/nzbmonkey-v([\d.]+)-(\w+)\.(\w+)/)
                 dl[name[2]] = {
@@ -42,11 +42,12 @@
             var $btn = $.create('a', {
                 className: 'btn-' + os,
                 href: obj.url,
-                title: obj.ext + '-file, ' + obj.size + ' bytes'
-
+                title: 'v' + obj.version + ', ' + obj.ext + '-file, ' + obj.size + ' bytes'
             })
             $btnContainer.appendChild($btn)
         })
+
+        $('#version').textContent = 'v' + dl['win'].version
 
         $btnContainer.classList.remove('is-loading')
     }).catch(function(error){

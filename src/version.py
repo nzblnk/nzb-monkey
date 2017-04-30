@@ -2,6 +2,9 @@
 """
 
 History
+v0.1.12
++ Bugfix SABNzbd
+
 v0.1.11
 + Basepath added (thx ralle12345)
 + Sanitized searchstring (thx plintogo)

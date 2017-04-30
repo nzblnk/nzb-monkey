@@ -1479,6 +1479,8 @@ def main():
                                exe_target_cfg.as_bool('ssl'),
                                exe_target_cfg.get('nzbkey', ''),
                                exe_target_cfg.get('basepath', 'sabnzbd'),
+                               exe_target_cfg.get('basicauth_username', ''),
+                               exe_target_cfg.get('basicauth_password', ''),
                                category_args if category_args else exe_target_cfg.get('category', ''),
                                exe_target_cfg.as_bool('addpaused'),
                                nzbsrc['tag'] if nzbsrc['pass'] is None else '%s{{%s}}' % (

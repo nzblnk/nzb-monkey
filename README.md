@@ -24,4 +24,14 @@ Feel free to send pull requests.
 
 ### macOS Support
 
-We still need someone who gives this monkey wings on macOS. 
+To run nzbmonkey on OSX follow this recipe:
+
+- brew install python3
+- checkout the source (~/Source/nzb-monkey in my case)
+- download LinCastor here: https://onflapp.wordpress.com/lincastor/ and install
+- setup a new url-scheme as shown in my screenshot (see resource/Lincastor.png)
+
+This approach still has two problems:
+
+- the terminal window doesn't close automatically
+- then debugging is enabled an error is generated and the monkey doesn't work :(

@@ -241,7 +241,7 @@ class NZBParser(object):
 
         """
         try:
-            self.nzb = bytearray(nzb_file, encoding='utf-8')
+            self.nzb = nzb_file
         except TypeError:
             pass
 
@@ -664,7 +664,7 @@ class NZBDownload(object):
         self.debug = debug
 
         self.nzb_url = ''
-        self.nzb = ''
+        self.nzb = b''
 
     def search_nzb_url(self):
         """Search for NZB Download URL and return the URL
@@ -712,7 +712,7 @@ class NZBDownload(object):
 
         print(Col.OK + ' DONE' + Col.OFF)
 
-        self.nzb = res.text
+        self.nzb = res.content
 
         return True, self.nzb
 
@@ -811,12 +811,8 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
             active_search_engines[priority] = list()
         active_search_engines[priority].append(engine)
 
-    found_complete_nzb = False
-
     for prio in sorted(active_search_engines):
         for engine in active_search_engines[prio]:
-            if found_complete_nzb:
-                continue
             print('   with {} ...'.format(search_defs[engine]['name']), end='', flush=True)
 
             result, nzb = NZBDownload(search_defs[engine]['searchUrl'],
@@ -848,7 +844,7 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 downloaded_nzbs.append(tmp_nzb)
                 # Stop downloading more NZB files
                 if not best_nzb or (tmp_nzb[2] == 0 and tmp_nzb[3] == 0.0):
-                    found_complete_nzb = True
+                    break
 
             # NZB not complete. Add NZB if no complete NZB until now and we allow incomplete NZBs
             elif not downloaded_nzbs and not skip_failed:

@@ -241,7 +241,7 @@ class NZBParser(object):
 
         """
         try:
-            self.nzb = bytearray(nzb_file, encoding='utf-8')
+            self.nzb = nzb_file
         except TypeError:
             pass
 
@@ -664,7 +664,7 @@ class NZBDownload(object):
         self.debug = debug
 
         self.nzb_url = ''
-        self.nzb = ''
+        self.nzb = b''
 
     def search_nzb_url(self):
         """Search for NZB Download URL and return the URL
@@ -712,7 +712,7 @@ class NZBDownload(object):
 
         print(Col.OK + ' DONE' + Col.OFF)
 
-        self.nzb = res.text
+        self.nzb = res.content
 
         return True, self.nzb
 

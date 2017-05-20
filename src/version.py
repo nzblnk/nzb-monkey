@@ -2,13 +2,16 @@
 """
 
 History
+v0.1.13
++ Timeout doubled für SABNzbd
+
 v0.1.12
 + Bugfix SABNzbd
 
 v0.1.11
 + Basepath added (thx ralle12345)
 + Sanitized searchstring (thx plintogo)
-+ Basic auth for SABNzbD (thx MarcLandis)
++ Basic auth for SABNzbd (thx MarcLandis)
 
 v0.1.10
 + requests 2.13.0 (incl openssl)
@@ -54,5 +57,5 @@ v0.1.0
 
 """
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

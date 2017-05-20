@@ -5,22 +5,22 @@
     NZB-Monkey
 """
 
+import argparse
 import base64
+import io
+import operator
 import os
 import re
-import io
 import sys
 import webbrowser
-import argparse
-import operator
 import xml.etree.ElementTree as ET
 from enum import Enum
-from os.path import basename, splitext, isfile, join, expandvars
-from time import sleep, time, localtime, strftime
-from urllib.parse import urlparse, parse_qs, quote
 from glob import glob
+from os.path import basename, splitext, isfile, join, expandvars
 from pathlib import Path
+from time import sleep, time, localtime, strftime
 from unicodedata import normalize
+from urllib.parse import urlparse, parse_qs, quote
 
 from nzblnkconfig import check_missing_modules
 
@@ -1099,7 +1099,7 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, basicauth_username, bas
         if basicauth_username and basicauth_password:
             auth = (basicauth_username, basicauth_password)
 
-        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT, auth=auth)
+        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT * 2, auth=auth)
     except requests.exceptions.RequestException as e:
         print(Col.FAIL + 'FAILED: {}'.format(e) + Col.OFF)
         return 1

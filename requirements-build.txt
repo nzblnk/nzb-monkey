@@ -2,5 +2,5 @@ pyperclip
 requests
 configobj
 colorama
-cryptography
+cryptography==1.8.2
 py2exe

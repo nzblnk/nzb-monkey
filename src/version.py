@@ -2,8 +2,13 @@
 """
 
 History
+v0.2.0
+- Added categories (automatic and manual)
+- Added new target: Synology Downloadstation
+- Removed offline indexers
+
 v0.1.13
-+ Timeout doubled für SABNzbd
++ Timeout doubled for SABNzbd
 
 v0.1.12
 + Bugfix SABNzbd
@@ -57,5 +62,5 @@ v0.1.0
 
 """
 
-__version__ = '0.1.13'
+__version__ = '0.2.0'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

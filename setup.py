@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import datetime
+import sys
 from distutils.core import setup
+
+from version import __version__, __requires__
 
 try:
     import py2exe
@@ -31,7 +33,7 @@ params = {
             "compressed": 1,
             "optimize": 2,
             'includes': 'nzblnkconfig',
-            'excludes': ['doctest','pdb','unittest','difflib','inspect'],
+            'excludes': ['doctest', 'pdb', 'unittest', 'difflib', 'inspect'],
             "dist_dir": 'dist'
         }
     },

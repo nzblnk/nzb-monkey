@@ -7,14 +7,15 @@ It contains so called "sections" witch are marked by square brackets.
 
 ### GENERAL section
 
-The `GENERAL` section is really short:
+The `GENERAL` section has only two options:
 
 ```
 [GENERAL]
 target = EXECUTE
+categorize = off
 ```
 
-The only interesting key here is `target`. It can have three values:
+The first key here is `target`. It can have four values:
 
 - `EXECUTE` - The NZB is handled by a software registered to the filetype `.NZB` on
   same machine. Comparable by downloading the NZB file to the hard disk and
@@ -26,7 +27,23 @@ The only interesting key here is `target`. It can have three values:
 - `NZBGET` - The NZB is pushed to a [NZBGet](http://nzbget.net/) on the same
   network or computer.  Described [here](#nzbget-section) 
   
+- `SYNOLOGYDLS` - The NZB is pushed to a [Synology Download
+  Station](https://www.synology.com/en-us/knowledgebase/DSM/help/DownloadStation/DownloadStation_desc)
+  on the same
+  network or computer.  Described [here](#synologydls-section)
+  
   `EXECUTE` is the default.
+  
+The second one is `categorize` which switches the categorisation modes. Options are here:
+
+- `off` - The default. Does nothing.
+ 
+- `auto` - The monkey tries to guess the category by the tagname. More information about
+ it [here](#categorizer-section).
+
+- `manual` - Before sending the NZB file to your download target, the monkey "asks" it for
+ your categories. These will be shown and you have to choose one by pressing the
+ corresponding number on you keyboard. This only works with _NZBGet_  and _SabNZBd_.
 
 ### EXECUTE section
 
@@ -71,15 +88,25 @@ host = localhost
 port = 8080
 ssl = False
 nzbkey =
+basicauth_username =
+basicauth_password =
+basepath = sabnzbd
 category =
+addpaused = False
 ```
 interesting. Here are all the parameters specific to SABnzbd set up:
 
 - `host` sets the hostname or IP of your SABnzbd
 - `port` sets the port. `8080` is default for HTTP and `9090` is default for HTTPS.
 - `ssl` enables SSL/TLS when set to `True`. Default is `False`.
-- `nzbkey` is the "NZB Key" from your SABnzbd configuration (General/ NZB Key)
-- `category` is one of the configured categories (Categories). Empty is Default category
+- `nzbkey` is the "**API** Key" (was the NZB Key in the past!) from your SABnzbd
+ configuration (General/ API Key)
+- `basicauth_username` and `basicauth_password` are used to do a basic authentication
+ (fill out only if you need it)
+- `basepath` is the API endpoint. Change this only if needed.
+- `category` is one of the configured categories (Categories). Empty is default category. If
+ category choosing is enabled, this will be overwritten.
+- `addpaused` can be set to `True` if every NZB should be added in pause state
 
 ### NZBGET section
 
@@ -92,6 +119,8 @@ ssl = False
 user = nzbget
 pass = tegbzn
 category =
+basepath = xmlrpc
+addpaused = False
 ```
 interesting. Here are all the parameters specific to NZBGet set up:
 
@@ -100,8 +129,35 @@ interesting. Here are all the parameters specific to NZBGet set up:
 - `ssl` enables SSL/TLS when set to `True`. Default is `False`.
 - `user` is the "AddUsername" set in your NZBGet Security settings.
 - `pass` is the "AddPassword" set in your NZBGet Security settings.
+- `basepath` is the API endpoint. Change this only if needed.
 - `category` is one of the configured categories in your NZBGet Categories settings.
-  Empty is no category
+  Empty is no category. If category choosing is enabled, this will be overwritten.
+- `addpaused` can be set to `True` if every NZB should be added in pause state
+
+### SYNOLOGYDLS section
+
+Owner of a Synology DiskStation Manager can use the [Download
+Station](https://www.synology.com/en-us/knowledgebase/DSM/help/DownloadStation/DownloadStation_desc). To configure
+it this section is used.
+
+```
+[SYNOLOGYDLS]
+host = localhost
+port = 5000
+ssl = False
+user = 
+pass = 
+basepath = webapi
+```
+- `host` sets the hostname or IP of your Synology
+- `port` sets the port.  Default is `5000`. For SSL its normally `5001`
+- `ssl` enables SSL/TLS when set to `True`. Default is `False`.
+- `user` is the user on your DiskStation who has access to the Download Station software
+- `pass` is the corresponding password.
+- `basepath` is the API endpoint. Change this only if needed.
+
+Known bugs: The monkey also pushes the "unzip password" to the Download Station. There is a bug in their API so it
+doesn't use the password. Please add it manually.
 
 ### NZBCheck section
 
@@ -133,16 +189,27 @@ configurable.
 ```
 [Searchengines]
 binsearch = 1
-binsearch_alternative = 1
-nzbsearch = 1
+binsearch_alternative = 2
 nzbking = 3
-nzbclub = 2
-nzbindex = 1
+nzbindex = 4
 ```
 All keys are the corresponding search engines. A value of `0` means disabled.
 A value bigger than `0` means enabled. Bigger numbers mean a lower priority.
 A search engine with a `3` is checked after one with a `2`.
 Default for all search engines is `1`.
+
+### CATEGORIZER section
+
+The `CATEGORIZER` section defines the "searchterms" for a category guessing. It looks like this:
+
+```
+[CATEGORIZER]
+series = (s\d+e\d+|s\d+ complete)
+movies = (x264|xvid|bluray|720p|1080p|untouched)
+```
+There weird characters are [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression). Each value of this
+entries is tested against the current tagline. A positive finding stops the testing and the keyword (ex. "series") is
+used as category.
 
 ## Finally
 

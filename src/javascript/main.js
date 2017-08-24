@@ -24,8 +24,9 @@
                 dl[name[2]] = {
                     'version': name[1],
                     'url': el.browser_download_url,
-                    'size': el.size,
-                    'ext': name[3].toUpperCase()
+                    'size': parseInt(el.size).toLocaleString(),
+                    'ext': name[3].toUpperCase(),
+                    'cnt': el.download_count
                 }
             })
             localStorage.setItem('git_tag', xhr.getResponseHeader('ETag'))
@@ -42,7 +43,8 @@
             var $btn = $.create('a', {
                 className: 'btn-' + os,
                 href: obj.url,
-                title: 'v' + obj.version + ', ' + obj.ext + '-file, ' + obj.size + ' bytes'
+                title: 'v' + obj.version + ', ' + obj.ext + '-file, ' + obj.size + ' bytes, ' +
+                       obj.cnt + ' downloads'
             })
             $btnContainer.appendChild($btn)
         })

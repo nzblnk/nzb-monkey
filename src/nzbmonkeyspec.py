@@ -94,9 +94,11 @@ max_missing_files = integer(default = 2)
 best_nzb = boolean(default = True)
 
 [CATEGORIZER]
-# Place your category and you regex here:
-series = string(default = '(s\d+e\d+|s\d+ complete)')
-movies = string(default = '(x264|xvid|bluray|720p|1080p|untouched)')
+# Place your category and you regex here
+# Please uncomment the following lines
+
+# series = (s\d+e\d+|s\d+ complete)
+# movies = (x264|xvid|bluray|720p|1080p|untouched)
 
 
 [Searchengines]

@@ -2,6 +2,9 @@
 """
 
 History
+v0.2.1
+- Fixed category settings
+
 v0.2.0
 - Added categories (automatic and manual)
 - Added new target: Synology Downloadstation
@@ -62,5 +65,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

@@ -2,6 +2,9 @@
 """
 
 History
+v0.2.2
+- Addition of Newzleech support
+
 v0.2.1
 - Fixed category settings
 
@@ -65,5 +68,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

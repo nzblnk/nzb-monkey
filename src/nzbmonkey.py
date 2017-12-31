@@ -768,7 +768,15 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'regex': r'label for="box(?P<id>\d{8,})".*?class="highlight"',
                 'downloadUrl': 'http://nzbindex.com/download/{id}/',
                 'skip_segment_debug': False
-            }
+            },
+		'newzleech':
+			{
+				'name': 'Newzleech',
+				'searchUrl': 'https://www.newzleech.com/?m=search&q={0}',
+				'regex': r'name="binary\[\]" value="(?P<id>.*?)"',
+				'downloadUrl': 'https://www.newzleech.com/?m=gen&dl=1&post={id}',
+				'skip_segment_debug': False
+             }
     }
 
     downloaded_nzbs = list()
@@ -1480,7 +1488,8 @@ def main():
                                                 'binsearch_alternative':
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
-                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
+                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
+												'newzleech': cfg['Searchengines'].as_int('newzleech')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
                                                cfg['NZBCheck'].get('max_missing_segments_percent', 2.5),

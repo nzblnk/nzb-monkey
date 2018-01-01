@@ -113,4 +113,6 @@ binsearch_alternative = integer(default = 1)
 nzbindex =  integer(default = 1)
 # Enable NZBKing
 nzbking =  integer(default = 1)
+# Enable Newzleech
+newzleech =  integer(default = 1)
 """.split('\n'))

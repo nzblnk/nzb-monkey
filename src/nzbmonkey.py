@@ -5,28 +5,30 @@
     NZB-Monkey
 """
 
+import argparse
 import base64
+import io
+import json
+import operator
 import os
 import re
-import io
 import sys
 import webbrowser
-import argparse
-import operator
 import xml.etree.ElementTree as ET
 from enum import Enum
-from os.path import basename, splitext, isfile, join, expandvars
-from time import sleep, time, localtime, strftime
-from urllib.parse import urlparse, parse_qs, quote
 from glob import glob
+from os.path import basename, splitext, isfile, join, expandvars
 from pathlib import Path
+from time import sleep, time, localtime, strftime
 from unicodedata import normalize
+from urllib.parse import urlparse, parse_qs, quote
 
 from nzblnkconfig import check_missing_modules
 
 try:
     import pyperclip
     import requests
+    import urllib3
     from configobj import ConfigObj, SimpleVal
     from validate import Validator
     from colorama import Fore, init, Style
@@ -41,7 +43,7 @@ from nzblnkconfig import config_file, config_nzbmonkey
 from version import __version__
 from nzbmonkeyspec import getSpec
 
-requests.packages.urllib3.disable_warnings()
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 WAITING_TIME_LONG = 5
 WAITING_TIME_SHORT = 1
@@ -53,7 +55,8 @@ SAVE_STDERR = sys.stderr
 class ExeTypes(Enum):
     EXECUTE = 'EXECUTE',
     NZBGET = 'NZBGET',
-    SABNZBD = 'SABNZBD'
+    SABNZBD = 'SABNZBD',
+    SYNOLOGYDLS = 'SYNOLOGYDLS'
 
 
 class Col:
@@ -272,7 +275,7 @@ class NZBParser(object):
         self.files_upload_duration = 0
 
         self.regexes = {
-            'file_count_subject_1': re.compile(r'.*?[\(\[](\d{1,4})/(\d{1,4})[\)\]].*?\((\d{1,4})/(\d{1,5})\)', re.I),
+            'file_count_subject_1': re.compile(r'.*?[(\[](\d{1,4})/(\d{1,4})[)\]].*?\((\d{1,4})/(\d{1,5})\)', re.I),
             'file_count_subject_2': re.compile(r'.*?[\[](\d{1,4})/(\d{1,5})[\]]', re.I),
             'segment_count_subject': re.compile(r'.*?\((\d{1,4})/(\d{1,5})\)$', re.I)}
 
@@ -750,14 +753,6 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
                 'skip_segment_debug': False
             },
-        'nzbsearch':
-            {
-                'name': 'NZBSearch',
-                'searchUrl': 'http://nzbsearch.net/search.aspx?q={0}&st=5&sp=1',
-                'regex': r'href="/nzb_get\.aspx\?mid=(?P<id>.*?)"',
-                'downloadUrl': 'http://nzbsearch.net/nzb_get.aspx?mid={id}',
-                'skip_segment_debug': False
-            },
         'nzbking':
             {
                 'name': 'NZBKing',
@@ -766,28 +761,12 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'downloadUrl': 'http://www.nzbking.com/nzb:{id}',
                 'skip_segment_debug': True
             },
-        'nzbclub':
-            {
-                'name': 'NZBClub',
-                'searchUrl': 'http://www.nzbclub.com/nzbrss.aspx?q={0}',
-                'regex': r'enclosure.*?url="(?P<url>.*?)"',
-                'downloadUrl': '{url}',
-                'skip_segment_debug': False
-            },
         'nzbindex':
             {
                 'name': 'NZBIndex',
                 'searchUrl': 'http://nzbindex.com/search/?q={0}&sort=agedesc&hidespam=1',
                 'regex': r'label for="box(?P<id>\d{8,})".*?class="highlight"',
                 'downloadUrl': 'http://nzbindex.com/download/{id}/',
-                'skip_segment_debug': False
-            },
-        'newzleech':
-            {
-                'name': 'Newzleech',
-                'searchUrl': 'https://www.newzleech.com/?m=search&q={0}',
-                'regex': r'class="subject"><a\s{1,2}(?:class="incomplete"\s{1,2})??href="\/p\/(?P<id>.*?)\/',
-                'downloadUrl': 'https://www.newzleech.com/?m=gen&dl=1&post={id}',
                 'skip_segment_debug': False
             }
     }
@@ -971,7 +950,7 @@ class Writers(object):
 
     def __init__(self, *writers):
         self.writers = writers
-        self.ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+        self.ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -/]*[@-~]')
 
     def write(self, string):
         for w in self.writers:
@@ -1056,8 +1035,8 @@ def sec_to_time(seconds, days_only=False, ):
 # region NZB Targets
 
 
-def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, basicauth_username, basicauth_password, category, paused, sabnzbd_name, nzb_content,
-                     start_message='Pushing to SABNZBD', debug=False):
+def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, basicauth_username, basicauth_password, category, paused,
+                     sabnzbd_name, nzb_content, start_message='Pushing to SABNZBD', debug=False):
     """Push a NZB to SABnzbd
 
     :param str host: SABnzbd Hostname or IP
@@ -1099,7 +1078,8 @@ def push_nzb_sabnzbd(host, port, ssl, api_key, basepath, basicauth_username, bas
         if basicauth_username and basicauth_password:
             auth = (basicauth_username, basicauth_password)
 
-        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT, auth=auth)
+        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT * 2,
+                            auth=auth)
     except requests.exceptions.RequestException as e:
         print(Col.FAIL + 'FAILED: {}'.format(e) + Col.OFF)
         return 1
@@ -1146,14 +1126,14 @@ def push_nzb_nzbget(host, port, ssl, user, password, basepath, category, paused,
 
     data = ('<?xml version="1.0"?><methodCall><methodName>append</methodName><params>' +
             '<param><value><string>{0}.nzb</string></value></param>' +  # Filename
-            '<param><value><string>{1}</string></value></param>' +      # Content (NZB File)
-            '<param><value><string>{2}</string></value></param>' +      # Category
-            '<param><value><i4>0</i4></value></param>' +                # Priority
-            '<param><value><boolean>0</boolean></value></param>' +      # AddToTop
-            '<param><value><boolean>{3}</boolean></value></param>' +    # AddPaused
-            '<param><value><string></string></value></param>' +         # DupeKey
-            '<param><value><i4>0</i4></value></param>' +                # DupeScore
-            '<param><value><string>ALL</string></value></param>' +      # DupeMode
+            '<param><value><string>{1}</string></value></param>' +  # Content (NZB File)
+            '<param><value><string>{2}</string></value></param>' +  # Category
+            '<param><value><i4>0</i4></value></param>' +  # Priority
+            '<param><value><boolean>0</boolean></value></param>' +  # AddToTop
+            '<param><value><boolean>{3}</boolean></value></param>' +  # AddPaused
+            '<param><value><string></string></value></param>' +  # DupeKey
+            '<param><value><i4>0</i4></value></param>' +  # DupeScore
+            '<param><value><string>ALL</string></value></param>' +  # DupeMode
             '</params></methodCall>').format(
         nzb_filename,
         base64.b64encode(nzb_content.encode('utf8')).decode('ascii'),
@@ -1201,7 +1181,7 @@ def write_nzb_file(nzb_folder, tag, password, nzb_content, debug=False):
 
     # append password to filename
     if password:
-        if re.search('[\*\?\:\\/"<>|]', password) is not None:
+        if re.search('[*?:/"<>|]', password) is not None:
             print(' - Can not add password to filename, forbidden characters included - sorry.')
         else:
             tag += '{{%s}}' % password
@@ -1267,12 +1247,81 @@ def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtocl
     return 0
 
 
+def push_nzb_synologydls(host, port, ssl, username, password, basepath, tag, nzb_content, nzb_pass,
+                         start_message=' - Pushing to SYNOLOGYDLS', debug=False):
+    """Push a NZB to Synology DLS
+
+    :param str host: Diskstation hostname or IP
+    :param str port: Diskstation Port
+    :param bool ssl: Use https
+    :param str username: admin username
+    :param str password: admin password
+    :param str basepath: Basepath where Diskstation API lives
+    :param str tag: Filename without extension .nzb
+    :param str nzb_content: Content for the NZB File upload
+    :param str nzb_pass: Unpack password
+    :param str start_message: Customized start message
+    :param bool debug: Verbose output
+
+    :returns int: Return code 0 is OK, return code > 0 is NOK
+    """
+
+    print(start_message, end='', flush=True)
+
+    scheme = 'https' if ssl else 'http'
+
+    req_url = '{0}://{1}:{2}/{3}/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account={4}&passwd={5}' \
+              '&session=DownloadStation&format=cookie'.format(scheme, host, port, basepath, username, password)
+
+    sid = ''
+    try:
+        sid = json.loads(requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT).text)['data']['sid']
+    except requests.exceptions.RequestException as e:
+        print(Col.FAIL + 'FAILED' + Col.OFF)
+        if debug:
+            print('   Requests-Exception: {}'.format(e))
+        return 1
+
+    req_url = '{0}://{1}:{2}/{3}/DownloadStation/task.cgi'.format(scheme, host, port, basepath)
+
+    nzbname = '{}.nzb'.format(normalize('NFKD', tag).encode('ascii', 'ignore').decode("utf-8", "ignore"))
+    nzb_data = {'file': (nzbname, io.BytesIO(nzb_content.encode('utf8')))}
+
+    post_data = {
+        'api': 'SYNO.DownloadStation.Task',
+        'method': 'create',
+        'version': '1',
+        '_sid': sid,
+        'unzip_password': nzb_pass
+    }
+
+    try:
+        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT)
+
+        if res.status_code == 200 and res.text.find('success":true') > 0:
+            print(Col.OK + 'OK' + Col.OFF)
+        else:
+            print(Col.FAIL + 'FAILED' + Col.OFF)
+            if debug:
+                print('   Response-Text: "{}"'.format(res.text))
+            return 1
+
+    except requests.exceptions.RequestException as e:
+        print(Col.FAIL + 'FAILED' + Col.OFF)
+        if debug:
+            print('   Requests-Exception: {}'.format(e))
+        return 1
+
+    return 0
+
+
 # endregion
 
 
 def main():
     """NZB-Monkey - The easy way to download NZB files"""
-    name = 'NZB-Monkey v%s' % __version__
+
+    name = 'NZB-Monkey v{}'.format(__version__)
     print('\n %s\n %s' % (name, '=' * len(name)))
 
     script_path = sys.argv[0] if not hasattr(sys, 'frozen') else os.path.normpath(os.path.abspath(sys.executable))
@@ -1393,12 +1442,12 @@ def main():
         tag = re.sub('([^{]*).*', '\\1', tag.strip().replace(' ', '.'))
 
         header = None
-        found = re.search(r'(?mi)(?:subject:|header:)\s+?(?:header:\s+)?(.+)$', clip.strip())
+        found = re.search(r'(?mi)(?:subject:|header:)\s+?(?:header:\s+)?(\S+)', clip.strip())
         if found is not None:
             header = found.group(1)
 
         password = ''
-        found = re.search(r'(?mi)(?:passwor[dt]|pw|pwd):\s*?(\S+)\s*?$', clip.strip())
+        found = re.search(r'(?mi)(?:passwor[dt]|pw|pwd):\s*?(\S+)', clip.strip())
         if found is not None:
             password = found.group(1)
 
@@ -1428,13 +1477,10 @@ def main():
     res, nzb, used_search_engine, = search_nzb(nzbsrc['header'],
                                                nzbsrc['pass'],
                                                {'binsearch': cfg['Searchengines'].as_int('binsearch'),
-                                                'binsearch_alternative': cfg['Searchengines'].as_int(
-                                                    'binsearch_alternative'),
-                                                'nzbsearch': cfg['Searchengines'].as_int('nzbsearch'),
+                                                'binsearch_alternative':
+                                                    cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
-                                                'nzbclub': cfg['Searchengines'].as_int('nzbclub'),
-                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
-                                                'newzleech': cfg['Searchengines'].as_int('newzleech')},
+                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
                                                cfg['NZBCheck'].get('max_missing_segments_percent', 2.5),
@@ -1446,6 +1492,108 @@ def main():
         return res
     # endregion
 
+    # region Categorizer
+
+    category = category_args if category_args else exe_target_cfg.get('category', '')
+
+    SEC_CATEGORIZER = 'CATEGORIZER'
+
+    categorize_mode = cfg['GENERAL'].get('categorize', 'off').lower()
+    categorize_mode = categorize_mode if categorize_mode in ['off', 'auto', 'manual'] else 'off'
+
+    # Auto categorizer
+
+    if categorize_mode == 'auto' and SEC_CATEGORIZER in cfg.keys():
+        for cat in cfg[SEC_CATEGORIZER].keys():
+            try:
+                if re.compile(cfg[SEC_CATEGORIZER].get(cat), re.IGNORECASE).search(nzbsrc['tag']):
+                    category = cat
+                    print("\n - Categorizer set category to: {}{}{}".format(Col.OK, cat, Col.OFF))
+                    break
+            except:
+                print_and_wait(Col.WARN + " > ERROR: Your category \"{}\" is a invalid regex!".format(cat) + Col.OFF,
+                               WAITING_TIME_LONG)
+
+    elif categorize_mode == 'manual':
+        cat_choice = []
+
+        # Ask SabNZBs for categories
+
+        if ExeTypes.SABNZBD.name == exe_target:
+            scheme = 'https' if exe_target_cfg.as_bool('ssl') else 'http'
+            req_url = '{0}://{1}:{2}/{3}/api?mode=queue&output=json' \
+                      '&apikey={4}'.format(scheme,
+                                           exe_target_cfg.get('host', 'localhost'),
+                                           exe_target_cfg.get('port', '8080'),
+                                           exe_target_cfg.get('basepath', 'sabnzbd'),
+                                           exe_target_cfg.get('nzbkey', ''))
+
+            try:
+                res = json.loads(requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT * 2).text)
+                if 'error' in res.keys() and res['error'].lower() == 'api key incorrect':
+                    print(Col.FAIL + ' - Please use the API KEY not the NZB KEY in your config!' + Col.OFF)
+                    raise EnvironmentError
+
+                if 'queue' not in res.keys():
+                    print(Col.FAIL + ' - Reading categories failed!' + Col.OFF)
+                    raise EnvironmentError
+
+                sabcats = res['queue']['categories']
+                for sabcat in sabcats:
+                    if sabcat != '*':
+                        cat_choice.append(sabcat)
+
+            except (EnvironmentError, ValueError):
+                cat_choice = []
+
+        # Ask NZBGet for categories
+
+        if ExeTypes.NZBGET.name == exe_target:
+
+            scheme = 'https' if exe_target_cfg.as_bool('ssl') else 'http'
+
+            req_url = '{0}://{1}:{2}/{3}/config'.format(scheme,
+                                                        exe_target_cfg.get('host', 'localhost'),
+                                                        exe_target_cfg.get('port', '6789'),
+                                                        exe_target_cfg.get('basepath', 'xmlrpc')
+                                                        .replace('xmlrpc', 'jsonrpc'))
+            auth = None
+            if exe_target_cfg.get('pass', '') is not None:
+                auth = (exe_target_cfg.get('user', ''), exe_target_cfg.get('pass', ''))
+
+            try:
+                res = json.loads(requests.get(req_url, auth=auth, verify=False, timeout=REQUESTS_TIMEOUT).text)
+                if 'result' not in res.keys():
+                    print(Col.FAIL + ' - Reading categories failed!' + Col.OFF)
+                    raise EnvironmentError
+
+                cfgregex = re.compile('Category\d\.Name', re.IGNORECASE)
+
+                for cfg in res['result']:
+                    if cfgregex.match(cfg['Name']):
+                        cat_choice.append(cfg['Value'])
+
+            except (ValueError, EnvironmentError):
+                cat_choice = []
+
+        if cat_choice:
+            print(' - Choose from one of the categories or\n   just press enter to choose no category:\n')
+
+            for idx, cat in enumerate(cat_choice):
+                print('   [{}] {}'.format(idx + 1, cat))
+
+            try:
+                uch = int(input('\n   Your choice: ')) - 1
+                if uch < 0 or uch >= len(cat_choice):
+                    raise ValueError
+
+                category = cat_choice[uch]
+                print("\n - You set the category to: {}{}{}".format(Col.OK, category, Col.OFF))
+            except ValueError:
+                pass
+
+    # endregion
+
     # region Exec NZBGET
     if ExeTypes.NZBGET.name == exe_target:
         res = push_nzb_nzbget(exe_target_cfg.get('host', 'localhost'),
@@ -1454,7 +1602,7 @@ def main():
                               exe_target_cfg.get('user', ''),
                               exe_target_cfg.get('pass', ''),
                               exe_target_cfg.get('basepath', 'xmlrpc'),
-                              category_args if category_args else exe_target_cfg.get('category', ''),
+                              category,
                               exe_target_cfg.as_bool('addpaused'),
                               nzbsrc['tag'],
                               nzb,
@@ -1481,7 +1629,7 @@ def main():
                                exe_target_cfg.get('basepath', 'sabnzbd'),
                                exe_target_cfg.get('basicauth_username', ''),
                                exe_target_cfg.get('basicauth_password', ''),
-                               category_args if category_args else exe_target_cfg.get('category', ''),
+                               category,
                                exe_target_cfg.as_bool('addpaused'),
                                nzbsrc['tag'] if nzbsrc['pass'] is None else '%s{{%s}}' % (
                                    nzbsrc['tag'], nzbsrc['pass']),
@@ -1497,6 +1645,32 @@ def main():
             print_and_wait('Close window in {} second(s)'.format(waiting_time), waiting_time)
             debug_output_close(debug_logfile, debug)
             return res
+    # endregion
+
+    # region Exec SYNOLOGYDLS
+
+    elif ExeTypes.SYNOLOGYDLS.name == exe_target:
+        res = push_nzb_synologydls(exe_target_cfg.get('host', 'localhost'),
+                                   exe_target_cfg.get('port', '8080'),
+                                   exe_target_cfg.as_bool('ssl'),
+                                   exe_target_cfg.get('user', ''),
+                                   exe_target_cfg.get('pass', ''),
+                                   exe_target_cfg.get('basepath', 'webapi'),
+                                   nzbsrc['tag'],
+                                   nzb,
+                                   nzbsrc['pass'],
+                                   ' - Pushing to SYNOLOGY-DLS ...',
+                                   debug)
+        if not debug:
+            print(' - Done')
+            if res:
+                waiting_time = WAITING_TIME_LONG
+            else:
+                waiting_time = WAITING_TIME_SHORT
+            print_and_wait('Close window in {} second(s)'.format(waiting_time), waiting_time)
+            debug_output_close(debug_logfile, debug)
+            return res
+
     # endregion
 
     # region Exec EXECUTE

@@ -156,9 +156,6 @@ basepath = webapi
 - `pass` is the corresponding password.
 - `basepath` is the API endpoint. Change this only if needed.
 
-Known bugs: The monkey also pushes the "unzip password" to the Download Station. There is a bug in their API so it
-doesn't use the password. Please add it manually.
-
 ### NZBCheck section
 
 The `NZBCheck` section lets you configure the NZB verification mechanism.

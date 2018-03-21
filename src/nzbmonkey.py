@@ -768,6 +768,14 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'regex': r'label for="box(?P<id>\d{8,})".*?class="highlight"',
                 'downloadUrl': 'http://nzbindex.com/download/{id}/',
                 'skip_segment_debug': False
+            },
+        'newzleech':
+            {
+                'name': 'Newzleech',
+                'searchUrl': 'https://www.newzleech.com/?m=search&q={0}',
+                'regex': r'class="subject"><a\s+(?:class="incomplete"\s+)?href="\?p=(?P<id>\d+)',
+                'downloadUrl': 'https://www.newzleech.com/?m=gen&dl=1&post={id}',
+                'skip_segment_debug': False
             }
     }
 
@@ -1273,7 +1281,6 @@ def push_nzb_synologydls(host, port, ssl, username, password, basepath, tag, nzb
     req_url = '{0}://{1}:{2}/{3}/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account={4}&passwd={5}' \
               '&session=DownloadStation&format=cookie'.format(scheme, host, port, basepath, username, password)
 
-    sid = ''
     try:
         sid = json.loads(requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT).text)['data']['sid']
     except requests.exceptions.RequestException as e:
@@ -1282,22 +1289,25 @@ def push_nzb_synologydls(host, port, ssl, username, password, basepath, tag, nzb
             print('   Requests-Exception: {}'.format(e))
         return 1
 
-    req_url = '{0}://{1}:{2}/{3}/DownloadStation/task.cgi'.format(scheme, host, port, basepath)
+    req_url = '{0}://{1}:{2}/{3}/entry.cgi'.format(scheme, host, port, basepath)
 
     nzbname = '{}.nzb'.format(normalize('NFKD', tag).encode('ascii', 'ignore').decode("utf-8", "ignore"))
-    nzb_data = {'file': (nzbname, io.BytesIO(nzb_content.encode('utf8')))}
 
-    post_data = {
-        'api': 'SYNO.DownloadStation.Task',
-        'method': 'create',
-        'version': '1',
-        '_sid': sid,
-        'unzip_password': nzb_pass
-    }
+    # API reverse engineered, for some stupid reason the order of parameters matters - thx Synology!
+    file_data = [
+        ('api', (None, 'SYNO.DownloadStation2.Task', None)),
+        ('method', (None, 'create', None)),
+        ('version', (None, '2', None)),
+        ('extract_password', (None, '"' + nzb_pass + '"', None)),
+        ('destination', (None, '""', None)),
+        ('create_list', (None, 'false', None)),
+        ('type', (None, '"file"', None)),
+        ('file', (None, '["torrent"]', None)),
+        ('torrent', (nzbname, io.BytesIO(nzb_content.encode('utf8')), 'application/x-nzb; charset="UTF-8"'))
+    ]
 
     try:
-        res = requests.post(req_url, data=post_data, files=nzb_data, verify=False, timeout=REQUESTS_TIMEOUT)
-
+        res = requests.post(req_url, files=file_data, verify=False, timeout=REQUESTS_TIMEOUT, cookies={'id': sid})
         if res.status_code == 200 and res.text.find('success":true') > 0:
             print(Col.OK + 'OK' + Col.OFF)
         else:
@@ -1480,7 +1490,8 @@ def main():
                                                 'binsearch_alternative':
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
-                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
+                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
+                                                'newzleech': cfg['Searchengines'].as_int('newzleech')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
                                                cfg['NZBCheck'].get('max_missing_segments_percent', 2.5),

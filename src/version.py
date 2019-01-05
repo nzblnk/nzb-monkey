@@ -2,6 +2,13 @@
 """
 
 History
+v0.2.3
+- NzbindexBeta indexer added
+
+v0.2.2
+- Newzleech indexer added
+- Synology Downloadstation API fixed
+
 v0.2.1
 - Fixed category settings
 
@@ -65,5 +72,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.1'
+__version__ = '0.2.3'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

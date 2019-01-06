@@ -4,3 +4,5 @@ dist/
 *.nzb
 *.cfg
 *.pyc
+src/.vscode/settings.json
+src/nzbmonkey.log

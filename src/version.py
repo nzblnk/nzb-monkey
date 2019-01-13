@@ -2,6 +2,9 @@
 """
 
 History
+v0.2.4
+- NzbindexBeta indexer regex fix
+
 v0.2.3
 - NzbindexBeta indexer added
 
@@ -72,5 +75,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

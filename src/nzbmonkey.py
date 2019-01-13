@@ -683,6 +683,10 @@ class NZBDownload(object):
             print(Col.WARN + ' Connection Error' + Col.OFF, flush=True)
             return False, None
 
+        if res.status_code != requests.codes.ok:
+            print(Col.WARN + ' SERVICE DOWN: ' + res.reason + Col.OFF, flush=True)
+            return False, None
+        
         m = re.search(self.regex, res.text)
         if m is None:
             print(Col.WARN + ' NOT FOUND' + Col.OFF, flush=True)
@@ -742,7 +746,7 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'name': 'BinSearch',
                 'searchUrl': 'https://binsearch.info/?q={0}&max=100&adv_age=1100&server=',
                 'regex': r'name="(?P<id>\d{9,})"',
-                'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1',
+                'downloadUrl': 'https://www.binsearch.info/?action=nzb&{id}=1',
                 'skip_segment_debug': False
             },
         'binsearch_alternative':
@@ -750,7 +754,7 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'name': 'BinSearch - Alternative Server',
                 'searchUrl': 'https://binsearch.info/?q={0}&max=100&adv_age=1100&server=2',
                 'regex': r'name="(?P<id>\d{9,})"',
-                'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
+                'downloadUrl': 'https://www.binsearch.info/?action=nzb&{id}=1&server=2',
                 'skip_segment_debug': False
             },
         'nzbking':
@@ -764,17 +768,17 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
         'nzbindex':
             {
                 'name': 'NZBIndex',
-                'searchUrl': 'http://nzbindex.com/search/?q={0}&sort=agedesc&hidespam=1',
-                'regex': r'label for="box(?P<id>\d{8,})".*?class="highlight"',
-                'downloadUrl': 'http://nzbindex.com/download/{id}/',
-                'skip_segment_debug': False
-            },
-        'nzbindex_beta':
-            {
-                'name': 'NZBIndex Beta',
-                'searchUrl': 'http://beta.nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
-                'regex': r'<link>http:\/\/beta\.nzbindex\.com\/download\/(?P<id>\d{8,})<\/link>',
-                'downloadUrl': 'http://beta.nzbindex.com/download/{id}.nzb?r[]={id}',
+                'searchUrl': 'https://beta.nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc',
+                'regex': r'<link>http:\/\/beta\.nzbindex\.com\/download\/(?P<id>\d{8,})\/<\/link>',
+                'downloadUrl': 'https://beta.nzbindex.com/download/{id}/',
+
+
+
+
+
+
+
+
                 'skip_segment_debug': False
             },
         'newzleech':
@@ -1499,7 +1503,6 @@ def main():
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
                                                 'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
-                                                'nzbindex_beta': cfg['Searchengines'].as_int('nzbindex_beta'),
                                                 'newzleech': cfg['Searchengines'].as_int('newzleech')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),

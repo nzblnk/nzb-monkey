@@ -10,7 +10,7 @@ See detailed information [here](https://nzblnk.github.io/nzb-monkey/).
 
 ## Build the windows binary
 
-Use a **32-bit python v3.4** and install all requirements:
+~~Use a **32-bit python v3.4** and install all requirements:~~
 
 `pip install -r requirements-build.txt `
 

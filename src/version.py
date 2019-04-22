@@ -2,6 +2,10 @@
 """
 
 History
+v0.2.5
+- NzbindexBeta removed, its out of beta
+- Fixed NzbKing (good for old nzblnks)
+
 v0.2.4
 - NzbindexBeta indexer regex fix
 
@@ -75,5 +79,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

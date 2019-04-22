@@ -20,8 +20,9 @@ from glob import glob
 from os.path import basename, splitext, isfile, join, expandvars
 from pathlib import Path
 from time import sleep, time, localtime, strftime
-from unicodedata import normalize
 from urllib.parse import urlparse, parse_qs, quote
+
+from unicodedata import normalize
 
 from nzblnkconfig import check_missing_modules
 
@@ -683,7 +684,7 @@ class NZBDownload(object):
             print(Col.WARN + ' Connection Error' + Col.OFF, flush=True)
             return False, None
 
-        m = re.search(self.regex, res.text)
+        m = re.search(self.regex, res.text, re.DOTALL)
         if m is None:
             print(Col.WARN + ' NOT FOUND' + Col.OFF, flush=True)
             return False, None
@@ -701,7 +702,13 @@ class NZBDownload(object):
             if not res:
                 return False, None
         try:
-            res = requests.get(self.nzb_url, timeout=REQUESTS_TIMEOUT, verify=False)
+            urlparam = self.nzb_url.split('\t')
+            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+            if len(urlparam) > 1:
+                res = requests.post(urlparam[0], data=urlparam[1], headers=headers, timeout=REQUESTS_TIMEOUT,
+                                    verify=False)
+            else:
+                res = requests.get(self.nzb_url, timeout=REQUESTS_TIMEOUT, verify=False)
         except requests.exceptions.Timeout:
             print(Col.WARN + ' Timeout' + Col.OFF, flush=True)
             return False, None
@@ -755,26 +762,25 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
             },
         'nzbking':
             {
+                # Message to @Tensai:
+                #
+                # We love your work on the "NZB Donkey", but please be so fair and put credits in your
+                # tool. Means: please tell your users at least in the about screen on which tool yours
+                # is based on. Oh and as we speak about credits: a additional link from your tool to the
+                # NZBLNK website (https://nzblnk.info) would be great. Thanks and go on with your great
+                # work.
                 'name': 'NZBKing',
-                'searchUrl': 'http://www.nzbking.com/search/?q={0}',
-                'regex': r'href="/details:(?P<id>.*?)\/"',
-                'downloadUrl': 'http://www.nzbking.com/nzb:{id}',
+                'searchUrl': 'https://www.nzbking.com/search/?q={0}',
+                'regex': r'"csrfmiddlewaretoken" value="(?P<csrf>.*?)".*href="/details:(?P<id>.*?)/"',
+                'downloadUrl': 'https://www.nzbking.com/nzb/\tcsrfmiddlewaretoken={csrf}&nzb={id}',
                 'skip_segment_debug': True
             },
         'nzbindex':
             {
                 'name': 'NZBIndex',
-                'searchUrl': 'http://nzbindex.com/search/?q={0}&sort=agedesc&hidespam=1',
-                'regex': r'label for="box(?P<id>\d{8,})".*?class="highlight"',
-                'downloadUrl': 'http://nzbindex.com/download/{id}/',
-                'skip_segment_debug': False
-            },
-        'nzbindex_beta':
-            {
-                'name': 'NZBIndex Beta',
-                'searchUrl': 'http://beta.nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
-                'regex': r'<link>http:\/\/beta\.nzbindex\.com\/download\/(?P<id>\d{8,})\/?<\/link>',
-                'downloadUrl': 'http://beta.nzbindex.com/download/{id}.nzb?r[]={id}',
+                'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
+                'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d{8,})\/?<\/link>',
+                'downloadUrl': 'https://nzbindex.com/download/{id}.nzb?r[]={id}',
                 'skip_segment_debug': False
             },
         'newzleech':
@@ -1499,7 +1505,6 @@ def main():
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
                                                 'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
-                                                'nzbindex_beta': cfg['Searchengines'].as_int('nzbindex_beta'),
                                                 'newzleech': cfg['Searchengines'].as_int('newzleech')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),

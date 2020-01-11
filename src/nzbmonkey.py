@@ -771,8 +771,8 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 # work.
                 'name': 'NZBKing',
                 'searchUrl': 'https://www.nzbking.com/search/?q={0}',
-                'regex': r'"csrfmiddlewaretoken" value="(?P<csrf>.*?)".*href="/details:(?P<id>.*?)/"',
-                'downloadUrl': 'https://www.nzbking.com/nzb/\tcsrfmiddlewaretoken={csrf}&nzb={id}',
+                'regex': r'href="/nzb:(?P<id>.*?)/".*"',
+                'downloadUrl': 'https://www.nzbking.com/nzb:{id}/',
                 'skip_segment_debug': True
             },
         'nzbindex':

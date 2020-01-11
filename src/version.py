@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-
 History
+v0.2.6
+- fixed NZBKing (thx @macearl)
+- small fixes (thx @c-kr)
+
 v0.2.5
 - NzbindexBeta removed, its out of beta
 - Fixed NzbKing (good for old nzblnks)

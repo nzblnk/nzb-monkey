@@ -625,7 +625,7 @@ class NZBParser(object):
         # Segment check was done for more than 1 file with no missing segments or check was in OK range and
         # no files without segment count
         if self.files_checked > 0 and (
-                        self.segments_missing == 0 or segment_check_ok) and self.files_with_unknown_segments == 0:
+                self.segments_missing == 0 or segment_check_ok) and self.files_with_unknown_segments == 0:
             print_and_wait(Col.OK + 'OK - File count is unknown - Segment check is OK' + Col.OFF, self.waiting_time)
             return True, 4
 
@@ -762,13 +762,6 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
             },
         'nzbking':
             {
-                # Message to @Tensai:
-                #
-                # We love your work on the "NZB Donkey", but please be so fair and put credits in your
-                # tool. Means: please tell your users at least in the about screen on which tool yours
-                # is based on. Oh and as we speak about credits: a additional link from your tool to the
-                # NZBLNK website (https://nzblnk.info) would be great. Thanks and go on with your great
-                # work.
                 'name': 'NZBKing',
                 'searchUrl': 'https://www.nzbking.com/search/?q={0}',
                 'regex': r'href="/nzb:(?P<id>.*?)/".*"',

@@ -1445,7 +1445,7 @@ def main():
 
         clip = pyperclip.paste()
 
-        if clip is None or clip is '':
+        if clip is None or clip == '':
             print_and_wait(' Clipboard is empty. So please call {} <nzblnk> or with text in clipboard.'.format(
                 basename(sys.argv[0])),
                 WAITING_TIME_LONG)

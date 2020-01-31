@@ -114,7 +114,7 @@ def config_linux():
     terminals = ({'term': 'gnome-terminal',
                   'command': '--hide-menubar --geometry=100x16 --working-directory="{1}" -e "{2} %u"'},
                  {'term': 'konsole',
-                  'command': '--caption "{0}" --hide-menubar --hide-tabbar --workdir="{1}" --nofork -e "{2} %u"'},
+                  'command': '--p tabtitle=NZB-Monkey"{0}" --hide-menubar --hide-tabbar --workdir="{1}" --nofork -e "{2} %u"'},
                  {'term': 'xfce4-terminal',
                   'command': '--title="{0}" --hide-menubar --geometry=100x16 --working-directory="{1}" -e "{2} %u"'},
                  {'term': 'mate-terminal',

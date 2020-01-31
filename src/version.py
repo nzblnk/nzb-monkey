@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 History
+v0.2.7
+- Fix #15 (Linux KDE/Plasma konsole option removed)
+
 v0.2.6
 - fixed NZBKing (thx @macearl)
 - small fixes (thx @c-kr)
@@ -82,5 +85,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

@@ -6,3 +6,5 @@ build/
 *.cfg
 *.spec
 *.pyc
+*.log
+*.lnk

@@ -29,10 +29,18 @@ and it opened automatically with Notepad. Please continue reading with the
 ### Linux platform
 
 Please **create a folder** where you finally want to locate the NZB Monkey.
-Move the downloaded tar file into this folder and extract it with
-`tar -xzf <tar filename>` e.g. `tar -xzf nzbmonkey_source_0.1.8.tar.gz`.  
+Move the downloaded tbz2 file into this folder and extract it with
+`bzip2 -dc <tar filename> | tar xvf -` e.g. `bzip2 -dc nzbmonkey-v0.2.6-linux.tbz2 | tar xvf -`.  
 Execute the config script `./nzblnkconfig.py`, which enables the monkey to catch
 all clicks on a [NZBLNK™](https://nzblnk.github.io) link and checks all dependencies.  
+
+If you got the following error you should install pip3:
+```
+Traceback (most recent call last):
+  File "./nzblnkconfig.py", line 6, in <module>
+    import distutils.spawn
+ModuleNotFoundError: No module named 'distutils.spawn'
+```
 
 Dependencies output example:
 

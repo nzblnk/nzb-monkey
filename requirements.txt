@@ -3,3 +3,4 @@ requests
 configobj
 colorama
 cryptography
+py7zr

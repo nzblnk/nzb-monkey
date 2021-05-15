@@ -11,7 +11,9 @@ import io
 import json
 import operator
 import os
+import py7zr
 import re
+import subprocess
 import sys
 import webbrowser
 import xml.etree.ElementTree as ET
@@ -1179,7 +1181,7 @@ def push_nzb_nzbget(host, port, ssl, user, password, basepath, category, paused,
     return 0
 
 
-def write_nzb_file(nzb_folder, tag, password, nzb_content, debug=False):
+def write_nzb_file(nzb_folder, tag, password, nzb_content, compress, debug=False):
     """Write NZB file
 
     :param str nzb_folder: Destination folder for the NZB file
@@ -1187,12 +1189,15 @@ def write_nzb_file(nzb_folder, tag, password, nzb_content, debug=False):
     :param str password: Password - append to filename
     :param str nzb_content: Content for the NZB File
     :param bool debug: Verbose output and append unix time to nzb file
+    :param bool compress: Compress NZB file to 7z archive
 
     :returns int, str: status and nzb filename
     """
     # Append timestamp to file
     if debug:
         tag += '.{}'.format(int(time()))
+
+    nzb_filename_without_password = tag + '.nzb'
 
     # append password to filename
     if password:
@@ -1201,21 +1206,32 @@ def write_nzb_file(nzb_folder, tag, password, nzb_content, debug=False):
         else:
             tag += '{{%s}}' % password
 
-    nzb_file = join(nzb_folder, tag + '.nzb')
+    nzb_filename = tag + '.nzb'
 
-    try:
-        print(' - Saving NZB-file ... ', end='', flush=True)
-        with open(nzb_file, 'w', encoding='utf8') as f:
-            f.write(nzb_content)
-            print(Col.OK + 'OK' + Col.OFF)
+    if compress:
+        compressed_nzb_file = join(nzb_folder, nzb_filename_without_password + '.7z')
+        print(' - Compressing NZB-file ... ', end='', flush=True)
+        with py7zr.SevenZipFile(compressed_nzb_file, 'w') as archive:
+            archive.writestr(nzb_content, nzb_filename)
+        print(Col.OK + 'OK' + Col.OFF)
+        return 0, compressed_nzb_file
+    else:
+        nzb_file = join(nzb_folder, nzb_filename)
 
-    except IOError as e:
-        print(Col.FAIL + 'Failed: {}'.format(e) + Col.OFF)
-        return 1, None
-    return 0, nzb_file
+        try:
+            print(' - Saving NZB-file ... ', end='', flush=True)
+            with open(nzb_file, 'w', encoding='utf8') as f:
+                f.write(nzb_content)
+                print(Col.OK + 'OK' + Col.OFF)
+
+        except IOError as e:
+            print(Col.FAIL + 'Failed: {}'.format(e) + Col.OFF)
+            return 1, None
+        return 0, nzb_file
 
 
-def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtoclipboard, dontexecute, debug=False):
+def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtoclipboard, dontexecute, compress,
+                showinexplorer, debug=False):
     """Handle NZB execution Task
 
     1. Copy password to clipboard
@@ -1229,6 +1245,8 @@ def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtocl
     :param bool passtofile: If enabled append password to file
     :param bool passtoclipboard: If enabled copy password to clipboard
     :param bool dontexecute: If enabled don't Execute default programm for .nzb extension
+    :param bool compress: If enabled compress NZB file to 7z archive
+    :param bool showinexplorer: If enabled show file in explorer
     :param bool debug: Enable verbose output
 
     :returns int: Return code 0 is OK, return code > 0 is NOK
@@ -1245,7 +1263,7 @@ def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtocl
     else:
         password = None
 
-    res, nzb_file = write_nzb_file(nzb_folder, tag, password, nzb_content, debug)
+    res, nzb_file = write_nzb_file(nzb_folder, tag, password, nzb_content, compress, debug)
 
     if res:
         print_and_wait('Close window in {} second(s)'.format(2 * WAITING_TIME_LONG), 2 * WAITING_TIME_LONG)
@@ -1257,6 +1275,11 @@ def nzb_execute(nzb_folder, nzb_content, tag, nzb_password, passtofile, passtocl
         # Let the system decide how to open a .NZB-file
         webbrowser.open(nzb_file)
 
+        print(Col.OK + 'OK' + Col.OFF)
+
+    if showinexplorer:
+        print(' - Showing NZB-file in explorer... ', end='', flush=True)
+        subprocess.run(f'explorer /select,{nzb_file}')
         print(Col.OK + 'OK' + Col.OFF)
 
     return 0
@@ -1715,6 +1738,8 @@ def main():
                     exe_target_cfg.as_bool('passtofile'),
                     exe_target_cfg.as_bool('passtoclipboard'),
                     exe_target_cfg.as_bool('dontexecute'),
+                    exe_target_cfg.as_bool('compress') if 'compress' in exe_target_cfg else False,
+                    exe_target_cfg.as_bool('showinexplorer') if 'showinexplorer' in exe_target_cfg else False,
                     debug)
 
         # Clean up NZB Folder

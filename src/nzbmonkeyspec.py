@@ -25,9 +25,9 @@ nzbsavepath = string(default = '')
 # Don't execute default programm for .nzb
 dontexecute = boolean(default = True)
 # Compress NZB file to 7z archive
-compress = False
+compress = boolean(default = False)
 # Show file in explorer (Windows only)
-showinexplorer = False
+showinexplorer = boolean(default = False)
 # Delete old NZB files from nzbsavepath
 clean_up_enable = boolean(default = False)
 # NZB files older than x days will be deleted

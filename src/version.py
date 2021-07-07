@@ -2,7 +2,8 @@
 """
 History
 v0.2.7
-- Fix #15 (Linux KDE/Plasma konsole option removed)
+- Fix #15 (Linux KDE/Plasma konsole option removed, thx @PietroPizzi69)
+- Provider fail save (thx @kwaaak)
 - Fix DSM7 compatibility
 
 v0.2.6

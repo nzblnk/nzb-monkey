@@ -3,6 +3,7 @@
 History
 v0.2.7
 - Fix #15 (Linux KDE/Plasma konsole option removed)
+- Fix DSM7 compatibility
 
 v0.2.6
 - fixed NZBKing (thx @macearl)

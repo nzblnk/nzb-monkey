@@ -1285,8 +1285,8 @@ def push_nzb_synologydls(host, port, ssl, username, password, basepath, tag, nzb
 
     scheme = 'https' if ssl else 'http'
 
-    req_url = '{0}://{1}:{2}/{3}/auth.cgi?api=SYNO.API.Auth&version=2&method=login&account={4}&passwd={5}' \
-              '&session=DownloadStation&format=cookie'.format(scheme, host, port, basepath, username, password)
+    req_url = '{0}://{1}:{2}/{3}/auth.cgi?api=SYNO.API.Auth&version=3&method=login&account={4}&passwd={5}' \
+              '&session=DownloadStation&format=sid'.format(scheme, host, port, basepath, username, password)
 
     try:
         sid = json.loads(requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT).text)['data']['sid']

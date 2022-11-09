@@ -14,7 +14,7 @@ from subprocess import Popen
 from subprocess import call
 from time import sleep
 from version import __requires__
-
+from inspect import cleandoc
 
 class ExeTypes(Enum):
     EXECUTE = 'EXECUTE',
@@ -102,7 +102,7 @@ def config_linux():
     script_path = op.join(working_dir, 'nzbmonkey.py')
 
     # The desktop file creates a entry in the menu, maybe we need a icon.
-    desktop_file_content = """[Desktop Entry]
+    desktop_file_content = cleandoc("""[Desktop Entry]
     Type=Application
     Name=NZBlnk
     Exec={0}
@@ -110,7 +110,7 @@ def config_linux():
     MimeType=x-scheme-handler/nzblnk;
     NoDisplay=true
     Terminal=false
-    """
+    """)
     terminals = ({'term': 'gnome-terminal',
                   'command': '--hide-menubar --geometry=100x16 --working-directory="{1}" -e "{2} %u"'},
                  {'term': 'konsole',

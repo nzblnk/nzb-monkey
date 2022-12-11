@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 History
+v0.2.8
+- Fix #40 SABnzbd API compatibility
+- Remove NZBKing (Rip!)
+
 v0.2.7
 - Fix #15 (Linux KDE/Plasma konsole option removed, thx @PietroPizzi69)
 - Provider fail save (thx @kwaaak)
@@ -87,5 +91,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.7'
+__version__ = '0.2.8'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

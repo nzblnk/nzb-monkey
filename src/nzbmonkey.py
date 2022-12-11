@@ -277,7 +277,7 @@ class NZBParser(object):
 
         self.regexes = {
             'file_count_subject_1': re.compile(r'.*?[(\[](\d{1,4})/(\d{1,4})[)\]].*?\((\d{1,4})/(\d{1,5})\)', re.I),
-            'file_count_subject_2': re.compile(r'.*?[\[](\d{1,4})/(\d{1,5})[\]]', re.I),
+            'file_count_subject_2': re.compile(r'.*?\[(\d{1,4})/(\d{1,5})\]', re.I),
             'segment_count_subject': re.compile(r'.*?\((\d{1,4})/(\d{1,5})\)$', re.I)}
 
         self.max_missing_files = int(max_missing_files)
@@ -763,28 +763,12 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
                 'skip_segment_debug': False
             },
-        'nzbking':
-            {
-                'name': 'NZBKing',
-                'searchUrl': 'https://www.nzbking.com/search/?q={0}',
-                'regex': r'href="/nzb:(?P<id>.*?)/".*"',
-                'downloadUrl': 'https://www.nzbking.com/nzb:{id}/',
-                'skip_segment_debug': True
-            },
         'nzbindex':
             {
                 'name': 'NZBIndex',
                 'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
                 'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d{8,})\/?<\/link>',
                 'downloadUrl': 'https://nzbindex.com/download/{id}.nzb?r[]={id}',
-                'skip_segment_debug': False
-            },
-        'newzleech':
-            {
-                'name': 'Newzleech',
-                'searchUrl': 'https://www.newzleech.com/?m=search&q={0}',
-                'regex': r'class="subject"><a\s+(?:class="incomplete"\s+)?href="\?p=(?P<id>\d+)',
-                'downloadUrl': 'https://www.newzleech.com/?m=gen&dl=1&post={id}',
                 'skip_segment_debug': False
             }
     }
@@ -1499,9 +1483,7 @@ def main():
                                                {'binsearch': cfg['Searchengines'].as_int('binsearch'),
                                                 'binsearch_alternative':
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
-                                                'nzbking': cfg['Searchengines'].as_int('nzbking'),
-                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex'),
-                                                'newzleech': cfg['Searchengines'].as_int('newzleech')},
+                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
                                                cfg['NZBCheck'].get('max_missing_segments_percent', 2.5),
@@ -1542,7 +1524,7 @@ def main():
 
         if ExeTypes.SABNZBD.name == exe_target:
             scheme = 'https' if exe_target_cfg.as_bool('ssl') else 'http'
-            req_url = '{0}://{1}:{2}/{3}/api?mode=queue&output=json' \
+            req_url = '{0}://{1}:{2}/{3}/api?mode=get_cats&output=json' \
                       '&apikey={4}'.format(scheme,
                                            exe_target_cfg.get('host', 'localhost'),
                                            exe_target_cfg.get('port', '8080'),
@@ -1550,16 +1532,18 @@ def main():
                                            exe_target_cfg.get('nzbkey', ''))
 
             try:
-                res = json.loads(requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT * 2).text)
-                if 'error' in res.keys() and res['error'].lower() == 'api key incorrect':
-                    print(Col.FAIL + ' - Please use the API KEY not the NZB KEY in your config!' + Col.OFF)
+                res = requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT * 2)
+                if res.status_code == 403:
+                    print_and_wait(Col.FAIL + ' - Please use the API KEY not the NZB KEY in your config!' + Col.OFF, WAITING_TIME_LONG)
                     raise EnvironmentError
 
-                if 'queue' not in res.keys():
+                res = json.loads(res.text)
+
+                if 'categories' not in res.keys():
                     print(Col.FAIL + ' - Reading categories failed!' + Col.OFF)
                     raise EnvironmentError
 
-                sabcats = res['queue']['categories']
+                sabcats = res['categories']
                 for sabcat in sabcats:
                     if sabcat != '*':
                         cat_choice.append(sabcat)
@@ -1567,7 +1551,6 @@ def main():
             except (EnvironmentError, ValueError):
                 cat_choice = []
 
-        # Ask NZBGet for categories
 
         if ExeTypes.NZBGET.name == exe_target:
 

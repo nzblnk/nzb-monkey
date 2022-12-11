@@ -106,13 +106,9 @@ best_nzb = boolean(default = True)
 # 0 = disabled; 1-9 = enabled; 1-9 are also the order in which the search engines are used
 # More than 1 server with the same order number is allowed
 # Enable Binsearch
-binsearch =  integer(default = 1)
+binsearch =  integer(default = 2)
 # Enable Binsearch - Alternative Server
-binsearch_alternative = integer(default = 1)
+binsearch_alternative = integer(default = 2)
 # Enable NZBIndex
 nzbindex =  integer(default = 1)
-# Enable NZBKing
-nzbking =  integer(default = 1)
-# Enable Newzleech
-newzleech =  integer(default = 1)
 """.split('\n'))

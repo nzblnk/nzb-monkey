@@ -111,4 +111,6 @@ binsearch =  integer(default = 2)
 binsearch_alternative = integer(default = 2)
 # Enable NZBIndex
 nzbindex =  integer(default = 1)
+# Enable NZBKing
+nzbking =  integer(default = 1)
 """.split('\n'))

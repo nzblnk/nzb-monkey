@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 History
+v0.2.9
+- NZBKing is dead, long live the King
+
 v0.2.8
 - Fix #40 SABnzbd API compatibility
 - Remove NZBKing (Rip!)
@@ -91,5 +94,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

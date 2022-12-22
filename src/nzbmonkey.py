@@ -763,6 +763,14 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
                 'skip_segment_debug': False
             },
+        'nzbking':
+            {
+                'name': 'NZBKing',
+                'searchUrl': 'https://www.nzbking.com/search/?q={0}',
+                'regex': r'href="/nzb:(?P<id>.*?)/".*"',
+                'downloadUrl': 'https://www.nzbking.com/nzb:{id}/',
+                'skip_segment_debug': True
+            },
         'nzbindex':
             {
                 'name': 'NZBIndex',
@@ -1483,6 +1491,7 @@ def main():
                                                {'binsearch': cfg['Searchengines'].as_int('binsearch'),
                                                 'binsearch_alternative':
                                                     cfg['Searchengines'].as_int('binsearch_alternative'),
+                                                'nzbking': cfg['Searchengines'].as_int('nzbking'),
                                                 'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
@@ -1534,7 +1543,8 @@ def main():
             try:
                 res = requests.get(req_url, verify=False, timeout=REQUESTS_TIMEOUT * 2)
                 if res.status_code == 403:
-                    print_and_wait(Col.FAIL + ' - Please use the API KEY not the NZB KEY in your config!' + Col.OFF, WAITING_TIME_LONG)
+                    print_and_wait(Col.FAIL + ' - Please use the API KEY not the NZB KEY in your config!' + Col.OFF,
+                                   WAITING_TIME_LONG)
                     raise EnvironmentError
 
                 res = json.loads(res.text)
@@ -1550,7 +1560,6 @@ def main():
 
             except (EnvironmentError, ValueError):
                 cat_choice = []
-
 
         if ExeTypes.NZBGET.name == exe_target:
 

@@ -4,7 +4,7 @@
 
 Reference implementation of how to handle a [NZBLNK](https://nzblnk.github.io/)-URI.
 
-## Runing the monkey
+## Running the monkey
 
 See detailed information [here](https://nzblnk.github.io/nzb-monkey/).
 

@@ -750,17 +750,9 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
         'binsearch':
             {
                 'name': 'BinSearch',
-                'searchUrl': 'https://binsearch.info/?q={0}&max=100&adv_age=1100&server=',
-                'regex': r'name="(?P<id>\d{9,})"',
-                'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1',
-                'skip_segment_debug': False
-            },
-        'binsearch_alternative':
-            {
-                'name': 'BinSearch - Alternative Server',
-                'searchUrl': 'https://binsearch.info/?q={0}&max=100&adv_age=1100&server=2',
-                'regex': r'name="(?P<id>\d{9,})"',
-                'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
+                'searchUrl': 'https://binsearch.info/search?q={0}',
+                'regex': r'name="q" value="(?P<nzbname>.*?)".* href="\/details\/(?P<id>.*?)"',
+                'downloadUrl': 'https://binsearch.info/nzb?q={nzbname}&{id}=on',
                 'skip_segment_debug': False
             },
         'nzbking':
@@ -1488,11 +1480,11 @@ def main():
 
     res, nzb, used_search_engine, = search_nzb(nzbsrc['header'],
                                                nzbsrc['pass'],
-                                               {'binsearch': cfg['Searchengines'].as_int('binsearch'),
-                                                'binsearch_alternative':
-                                                    cfg['Searchengines'].as_int('binsearch_alternative'),
+                                               {
+                                                'binsearch': cfg['Searchengines'].as_int('binsearch'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
-                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
+                                                'nzbindex': cfg['Searchengines'].as_int('nzbindex')
+                                                },
                                                cfg['NZBCheck'].as_bool('best_nzb'),
                                                cfg['NZBCheck'].get('max_missing_files', 2),
                                                cfg['NZBCheck'].get('max_missing_segments_percent', 2.5),

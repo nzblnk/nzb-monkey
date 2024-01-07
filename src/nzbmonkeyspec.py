@@ -107,8 +107,6 @@ best_nzb = boolean(default = True)
 # More than 1 server with the same order number is allowed
 # Enable Binsearch
 binsearch =  integer(default = 3)
-# Enable Binsearch - Alternative Server
-binsearch_alternative = integer(default = 3)
 # Enable NZBIndex
 nzbindex =  integer(default = 1)
 # Enable NZBKing

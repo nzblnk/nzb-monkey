@@ -768,7 +768,7 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'name': 'NZBIndex',
                 'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
                 'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d+)\/?<\/link>',
-                'downloadUrl': 'https://nzbindex.com/download/{id}.nzb?r[]={id}',
+                'downloadUrl': 'https://nzbindex.com/download/{id}/',
                 'skip_segment_debug': False
             }
     }

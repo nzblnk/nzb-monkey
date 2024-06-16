@@ -755,14 +755,6 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
                 'downloadUrl': 'https://binsearch.info/nzb?{id}=on',
                 'skip_segment_debug': False
             },
-        'binsearch_alternative':
-            {
-                'name': 'BinSearch - Alternative Server',
-                'searchUrl': 'https://binsearch.info/?q={0}&max=100&adv_age=1100&server=2',
-                'regex': r'name="(?P<id>\d{9,})"',
-                'downloadUrl': 'http://www.binsearch.info/?action=nzb&{id}=1&server=2',
-                'skip_segment_debug': False
-            },
         'nzbking':
             {
                 'name': 'NZBKing',
@@ -1489,8 +1481,6 @@ def main():
     res, nzb, used_search_engine, = search_nzb(nzbsrc['header'],
                                                nzbsrc['pass'],
                                                {'binsearch': cfg['Searchengines'].as_int('binsearch'),
-                                                'binsearch_alternative':
-                                                    cfg['Searchengines'].as_int('binsearch_alternative'),
                                                 'nzbking': cfg['Searchengines'].as_int('nzbking'),
                                                 'nzbindex': cfg['Searchengines'].as_int('nzbindex')},
                                                cfg['NZBCheck'].as_bool('best_nzb'),

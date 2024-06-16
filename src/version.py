@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 History
+v0.2.10
+- Fix for Nzbindex search and download urls and regex
+- Fix for Binsearch search and download urls and regex
+- Remove Binsearch Alternativ Server (no longer available)
+
 v0.2.9
 - NZBKing is dead, long live the King
 
@@ -94,5 +99,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.9'
+__version__ = '0.2.10'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

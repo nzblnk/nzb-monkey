@@ -775,7 +775,7 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
             {
                 'name': 'NZBIndex',
                 'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
-                'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d{8,})\/?<\/link>',
+                'regex': r'<link>https://nzbindex.com/download/(?P<id>\d+)\/?<\/link>',
                 'downloadUrl': 'https://nzbindex.com/download/{id}.nzb?r[]={id}',
                 'skip_segment_debug': False
             }
@@ -1580,7 +1580,7 @@ def main():
                     print(Col.FAIL + ' - Reading categories failed!' + Col.OFF)
                     raise EnvironmentError
 
-                cfgregex = re.compile('Category\d\.Name', re.IGNORECASE)
+                cfgregex = re.compile(r'Category\d\.Name', re.IGNORECASE)
 
                 for cfg in res['result']:
                     if cfgregex.match(cfg['Name']):

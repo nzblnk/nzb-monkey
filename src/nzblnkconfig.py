@@ -126,7 +126,9 @@ def config_linux():
                  {'term': 'uxterm',
                   'command': '-geometry 100x16+200+200 -e "{2} %u"'},
                  {'term': 'xterm',
-                  'command': '-geometry 100x16+200+200 -e "{2} %u"'},)
+                  'command': '-geometry 100x16+200+200 -e "{2} %u"'},
+                 {'term': 'alacritty',
+                  'command': '--title {0} --working-directory={1} -e {2} %u'},)
 
     # Check terminals and create the desktop file with the first match
 

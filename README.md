@@ -1,4 +1,4 @@
-![Monkey-Logo](https://raw.githubusercontent.com/nzblnk/nzb-monkey/master/resource/nzb-monkey-128.png)
+<img src="https://raw.githubusercontent.com/nzblnk/nzb-monkey/master/resource/nzb-monkey.svg" width="128">
 
 # NZB Monkey
 

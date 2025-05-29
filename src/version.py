@@ -99,5 +99,5 @@ v0.1.0
 
 """
 
-__version__ = '0.2.10'
+__version__ = '0.2.11'
 __requires__ = ['pyperclip', 'requests', 'configobj', 'colorama', 'cryptography']

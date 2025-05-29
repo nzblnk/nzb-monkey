@@ -350,7 +350,8 @@ class NZBParser(object):
                 if event == 'start':
                     # If it's an NZBFile, create an object so that we can add the
                     # appropriate stuff to it.
-                    if elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}file':
+                    if elem.tag in ('{http://www.newzbin.com/DTD/2003/nzb}file',
+                                    '{https://www.newzbin.com/DTD/2003/nzb}file'):
                         current_file = NZBFile(
                             poster=elem.attrib['poster'],
                             date=elem.attrib['date'],
@@ -358,13 +359,16 @@ class NZBParser(object):
                             debug=self.debug)
 
                 elif event == 'end':
-                    if elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}file':
+                    if elem.tag in ('{http://www.newzbin.com/DTD/2003/nzb}file',
+                                    '{https://www.newzbin.com/DTD/2003/nzb}file'):
                         self.files.append(current_file)
 
-                    elif elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}group':
+                    elif elem.tag in ('{http://www.newzbin.com/DTD/2003/nzb}group',
+                                      '{https://www.newzbin.com/DTD/2003/nzb}group'):
                         current_file.add_group(elem.text)
 
-                    elif elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}segment':
+                    elif elem.tag in ('{http://www.newzbin.com/DTD/2003/nzb}segment',
+                                      '{https://www.newzbin.com/DTD/2003/nzb}segment'):
                         current_file.add_segment(
                             NZBSegment(
                                 bytes_=elem.attrib['bytes'],
@@ -766,9 +770,9 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
         'nzbindex':
             {
                 'name': 'NZBIndex',
-                'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
-                'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d+)\/?<\/link>',
-                'downloadUrl': 'https://nzbindex.com/download/{id}/',
+                'searchUrl': 'https://nzbindex.com/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
+                'regex': r'<link>(http|https)://nzbindex.com/download/(?P<id>.*nzb)/?</link>',
+                'downloadUrl': 'https://nzbindex.com/download/{id}',
                 'skip_segment_debug': False
             }
     }

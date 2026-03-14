@@ -347,10 +347,12 @@ class NZBParser(object):
 
         try:
             for event, elem in context:
+                # Strip namespace prefix to handle both http:// and https:// variants
+                local_tag = elem.tag.split('}')[-1] if '}' in elem.tag else elem.tag
                 if event == 'start':
                     # If it's an NZBFile, create an object so that we can add the
                     # appropriate stuff to it.
-                    if elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}file':
+                    if local_tag == 'file':
                         current_file = NZBFile(
                             poster=elem.attrib['poster'],
                             date=elem.attrib['date'],
@@ -358,13 +360,13 @@ class NZBParser(object):
                             debug=self.debug)
 
                 elif event == 'end':
-                    if elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}file':
+                    if local_tag == 'file':
                         self.files.append(current_file)
 
-                    elif elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}group':
+                    elif local_tag == 'group':
                         current_file.add_group(elem.text)
 
-                    elif elem.tag == '{http://www.newzbin.com/DTD/2003/nzb}segment':
+                    elif local_tag == 'segment':
                         current_file.add_segment(
                             NZBSegment(
                                 bytes_=elem.attrib['bytes'],
@@ -766,9 +768,9 @@ def search_nzb(header, password, search_engines, best_nzb, max_missing_files, ma
         'nzbindex':
             {
                 'name': 'NZBIndex',
-                'searchUrl': 'https://nzbindex.com/search/rss?q={0}&hidespam=1&sort=agedesc&complete=1',
-                'regex': r'<link>https:\/\/nzbindex\.com\/download\/(?P<id>\d+)\/?<\/link>',
-                'downloadUrl': 'https://nzbindex.com/download/{id}/',
+                'searchUrl': 'https://nzbindex.com/api/search?q={0}&complete=1&hidespam=1&sort=agedesc',
+                'regex': r'"id"\s*:\s*"(?P<id>[0-9a-f-]{36})"',
+                'downloadUrl': 'https://nzbindex.com/download/{id}.nzb',
                 'skip_segment_debug': False
             }
     }
